@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organization Dashboard — Thebes CPC Community</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><polygon points='30,16 23,28.1 9,28.1 2,16 9,3.9 23,3.9' fill='%23b18a24'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Amiri:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ec; --panel:#fffdf8; --panel-2:#faf8f1; --panel-3:#eeeade;
+  --line:rgba(29,35,51,.13); --line-2:rgba(29,35,51,.24);
+  --ink:#1d2333; --muted:#575e76; --faint:#8b90a4;
+  --gold:#b18a24; --gold-deep:#8a6a14; --gold-dim:rgba(177,138,36,.14);
+  --body:'IBM Plex Sans Arabic',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --disp:'Amiri',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--body); background:var(--bg); color:var(--ink); font-size:15px; line-height:1.75;
+  background-image:
+    radial-gradient(900px 420px at 88% -10%, rgba(177,138,36,.08), transparent 60%),
+    radial-gradient(800px 500px at -10% 110%, rgba(46,111,163,.06), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0 47px, rgba(29,35,51,.035) 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, rgba(29,35,51,.035) 47px 48px);
+}
+::selection{background:var(--gold); color:#fff}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#cfc9b6;border-radius:8px}
+.mono{font-family:var(--mono)}
+.svg-defs{position:absolute;width:0;height:0;overflow:hidden}
+.wrap{max-width:1220px; margin:0 auto; padding:0 26px}
+.topline{height:6px; background:linear-gradient(90deg,#2e6fa3,#b18a24,#b23a2c,#b18a24,#2e6fa3)}
+
+/* ---------- hero ---------- */
+.hero{padding:42px 0 6px; text-align:center}
+.hero .logo{width:100px; height:auto; margin:0 auto 12px; display:block; filter:drop-shadow(0 6px 16px rgba(177,138,36,.28))}
+.hero h1{font-family:var(--disp); font-size:clamp(1.8rem,4vw,2.5rem); line-height:1.4}
+.hero p{color:var(--muted); font-size:.85rem; margin-top:2px}
+.hero .chips{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px}
+.chip{font-family:var(--mono); font-size:.6rem; padding:6px 14px; border-radius:99px; letter-spacing:.12em}
+.chip.gold{background:var(--gold-dim); color:var(--gold-deep); border:1px solid rgba(177,138,36,.4)}
+.chip.plain{background:var(--panel); color:var(--muted); border:1px solid var(--line)}
+
+/* ---------- toolbar + legend ---------- */
+.toolbar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:32px 0 16px}
+.toolbar h2{font-size:1.02rem; font-weight:600}
+.toolbar h2 small{display:block; font-size:.62rem; color:var(--faint); font-family:var(--mono); letter-spacing:.14em; font-weight:400}
+.search{margin-left:auto; position:relative}
+.search input{background:var(--panel); border:1px solid var(--line); color:var(--ink); border-radius:10px; padding:10px 14px 10px 38px; font-family:var(--body); font-size:.82rem; width:260px; outline:none; transition:.3s}
+.search input:focus{border-color:rgba(177,138,36,.55); box-shadow:0 0 0 3px rgba(177,138,36,.12)}
+.search svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--faint)}
+.legend{display:flex; flex-wrap:wrap; gap:9px; margin:0 0 24px}
+.lg-item{display:flex; align-items:center; gap:7px; font-family:var(--mono); font-size:.56rem; letter-spacing:.1em; color:var(--muted); background:var(--panel); border:1px solid var(--line); border-radius:99px; padding:5px 13px}
+.lg-item i{width:9px; height:9px; border-radius:3px; flex:0 0 auto}
+
+/* ---------- KPIs ---------- */
+.kpis{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-bottom:34px}
+.kpi{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px 20px; transition:.35s; box-shadow:0 8px 22px -16px rgba(29,35,51,.35); min-width:0}
+.kpi:hover{transform:translateY(-3px); border-color:var(--line-2)}
+.kpi .lab{font-size:.72rem; color:var(--muted); display:flex; gap:8px; align-items:center}
+.kpi .lab svg{color:var(--gold-deep)}
+.kpi .val{font-family:var(--mono); font-size:2rem; font-weight:600; color:var(--ink); margin-top:4px}
+.kpi .sub{font-family:var(--mono); font-size:.56rem; letter-spacing:.12em; color:var(--faint)}
+
+/* ---------- chain of command ---------- */
+.cmd{margin-bottom:40px}
+.vline{width:2px; height:28px; margin:0 auto; background:linear-gradient(var(--gold),var(--line-2)); transform-origin:top; animation:drop .7s ease .2s both}
+.vline.blue{background:linear-gradient(#2e6fa3,var(--line-2))}
+@keyframes drop{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.spot{width:min(380px,92vw); margin:0 auto; background:var(--panel); border-radius:16px; padding:20px 22px; text-align:center; position:relative; transition:.35s; box-shadow:0 14px 34px -22px rgba(29,35,51,.4)}
+.spot:hover{transform:translateY(-4px)}
+.spot::before{content:""; position:absolute; top:0; left:0; right:0; height:3px; border-radius:3px; background:linear-gradient(90deg,transparent,var(--c,var(--gold)),transparent)}
+.spot.head{border:1.5px solid rgba(177,138,36,.55)}
+.spot.vice{border:1.5px solid rgba(46,111,163,.45); width:min(340px,88vw); padding:14px 18px}
+.spot .pos{font-family:var(--mono); font-size:.58rem; letter-spacing:.2em; color:var(--c,var(--gold-deep)); display:block; font-weight:700}
+.spot .av{width:56px; height:50px; margin:8px auto 6px; clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); background:var(--c,var(--gold)); display:grid; place-items:center; font-family:var(--mono); font-weight:700; font-size:.95rem; color:#fff}
+.spot.vice .av{width:40px; height:36px; font-size:.7rem; margin:6px auto 4px}
+.spot h3{font-size:1.1rem; line-height:1.4}
+.spot.vice h3{font-size:.95rem}
+.spot .tid{font-family:var(--mono); font-size:.54rem; color:var(--faint); letter-spacing:.14em; display:block; margin-top:4px}
+
+.branches{display:grid; grid-template-columns:minmax(0,1fr); gap:0}
+.row2{position:relative; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; padding-top:26px}
+.row2::before{content:""; position:absolute; top:0; left:25%; right:25%; height:2px; background:var(--line-2)}
+.row2 .bcard::before{content:""; position:absolute; top:-26px; left:50%; width:2px; height:26px; background:var(--line-2)}
+.bcard{position:relative; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; transition:.35s; box-shadow:0 10px 26px -18px rgba(29,35,51,.4); min-width:0}
+.bcard:hover{border-color:var(--line-2)}
+.bhead{display:flex; align-items:center; gap:11px; padding-bottom:12px; border-bottom:1px dashed var(--line-2); margin-bottom:12px; flex-wrap:wrap}
+.bhead .av{width:38px; height:34px; clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); display:grid; place-items:center; font-family:var(--mono); font-weight:700; font-size:.66rem; color:#fff; flex:0 0 auto}
+.bhead .t{font-family:var(--mono); font-size:.56rem; letter-spacing:.16em; color:var(--c); display:block; font-weight:700}
+.bhead b{font-size:.9rem; line-height:1.4}
+.vchip{font-family:var(--mono); font-size:.52rem; letter-spacing:.06em; color:var(--muted); border:1px dashed var(--line-2); padding:4px 9px; border-radius:6px; margin-left:auto; text-align:center; flex:0 1 auto; background:var(--panel-2); white-space:normal; line-height:1.6; display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap}
+.vchip b{color:var(--ink); font-weight:600; font-size:.72rem}
+.subgrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+.subgrid .unit:last-child:nth-child(odd){grid-column:1/-1}
+
+/* ---------- units ---------- */
+.unit{background:var(--panel-2); border:1px solid var(--line); border-inline-start:4px solid var(--c); border-radius:12px; padding:12px 14px; transition:.3s; min-width:0}
+.unit:hover{border-color:var(--line-2); border-inline-start-color:var(--c)}
+.unit-head{display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; flex-wrap:wrap}
+.unit-head .dot{width:9px; height:9px; border-radius:3px; background:var(--c); flex:0 0 auto}
+.unit-head .ut{font-family:var(--mono); font-size:.6rem; letter-spacing:.14em; color:var(--ink); font-weight:700}
+.unit-head .uc{font-family:var(--mono); font-size:.56rem; color:var(--muted); background:var(--panel-3); padding:2px 8px; border-radius:5px}
+.unit-head .tog{margin-left:auto; color:var(--faint); transition:transform .3s}
+.unit.closed .tog{transform:rotate(-90deg)}
+.unit.closed .people,.unit.closed .leads,.unit.closed .solo{display:none}
+.leads{display:flex; gap:9px; flex-wrap:wrap; margin:11px 0 2px}
+.ld{display:flex; align-items:center; gap:9px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:6px 13px 6px 6px; transition:.25s; min-width:0; flex-wrap:wrap}
+.ld:hover{border-color:var(--line-2); transform:translateY(-1px)}
+.ld .lb{font-family:var(--mono); font-size:.5rem; letter-spacing:.1em; color:#fff; padding:4px 9px; border-radius:6px; font-weight:700; white-space:nowrap}
+.ld b{font-size:.8rem; line-height:1.4}
+.people{display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:8px; margin-top:10px}
+.pcard{display:flex; align-items:center; gap:9px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:7px 10px 7px 7px; transition:.25s; animation:pop .4s both; animation-delay:calc(var(--i)*40ms); position:relative; min-width:0}
+@keyframes pop{from{opacity:0; transform:scale(.92)}to{opacity:1; transform:none}}
+.pcard:hover{border-color:var(--c); transform:translateY(-2px); box-shadow:0 8px 18px -12px rgba(29,35,51,.45)}
+.pcard .av{width:30px; height:27px; clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); background:var(--c); display:grid; place-items:center; font-family:var(--mono); font-size:.54rem; font-weight:700; color:#fff; flex:0 0 auto}
+.pcard .pi{min-width:0; flex:1}
+.pcard .pi b{font-size:.75rem; display:block; line-height:1.35; overflow-wrap:anywhere}
+.pcard .pr{font-family:var(--mono); font-size:.5rem; letter-spacing:.12em; font-weight:700; display:block}
+.pcard .more{font-family:var(--mono); font-size:.54rem; color:var(--muted); border:1px dashed var(--line-2); border-radius:5px; padding:2px 7px; cursor:help; flex:0 0 auto; background:var(--panel-2)}
+.pcard.dim{opacity:.25; filter:grayscale(1)}
+.solo{border:1.5px dashed var(--line-2); border-radius:9px; text-align:center; font-family:var(--mono); font-size:.56rem; letter-spacing:.14em; color:var(--faint); padding:8px; margin-top:10px}
+
+/* ---------- panels ---------- */
+.panels{display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:16px; margin-bottom:16px}
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px 22px; transition:.35s; box-shadow:0 10px 26px -18px rgba(29,35,51,.4); min-width:0}
+.panel:hover{border-color:var(--line-2)}
+.panel h2{font-size:.95rem; font-weight:600; display:flex; align-items:center; gap:9px; margin-bottom:16px}
+.panel h2 svg{color:var(--gold-deep)}
+.brow{display:grid; grid-template-columns:118px minmax(0,1fr) 30px; align-items:center; gap:12px; margin-bottom:11px; font-size:.72rem}
+.brow .bl{font-family:var(--mono); font-size:.58rem; letter-spacing:.1em; color:var(--muted)}
+.brow .bar{height:9px; background:var(--panel-3); border-radius:5px; overflow:hidden; border:1px solid var(--line)}
+.brow .bar i{display:block; height:100%; width:0; border-radius:5px; background:var(--c); transition:width 1.1s cubic-bezier(.2,.7,.2,1) .3s}
+.in .brow .bar i{width:var(--w)}
+.brow .bv{font-family:var(--mono); font-size:.7rem; color:var(--ink); text-align:left; font-weight:600}
+.mrow{display:flex; align-items:center; gap:12px; padding:10px 12px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; margin-bottom:9px; transition:.25s; min-width:0}
+.mrow:hover{border-color:var(--line-2); transform:translateX(3px)}
+.mrow .av{width:34px; height:30px; clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); background:var(--gold); display:grid; place-items:center; font-family:var(--mono); font-size:.6rem; font-weight:700; color:#fff; flex:0 0 auto}
+.mrow .mi{min-width:0; flex:1}
+.mrow b{font-size:.84rem; display:block; line-height:1.4}
+.mrow .tags{display:flex; flex-wrap:wrap; gap:5px; margin-top:4px}
+.mrow .cnt{margin-left:auto; font-family:var(--mono); font-size:.9rem; font-weight:700; color:var(--gold-deep); flex:0 0 auto}
+.mrow .cnt small{display:block; font-size:.5rem; letter-spacing:.12em; color:var(--faint); font-weight:400}
+.rt{font-family:var(--mono); font-size:.52rem; letter-spacing:.06em; padding:2px 8px; border-radius:5px; font-weight:700}
+
+/* ---------- directory ---------- */
+.dirwrap{margin-bottom:40px}
+.tablewrap{overflow-x:auto}
+table{width:100%; border-collapse:collapse; font-size:.82rem}
+th{font-family:var(--mono); font-size:.56rem; letter-spacing:.16em; color:var(--faint); font-weight:600; text-align:left; padding:9px 12px; border-bottom:1.5px solid var(--line-2)}
+td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top}
+tbody tr{transition:.25s; animation:pop .45s both; animation-delay:calc(var(--i)*40ms)}
+tbody tr:hover td{background:rgba(177,138,36,.06)}
+tbody tr:last-child td{border-bottom:none}
+.who{display:flex; align-items:center; gap:10px}
+.who .av{width:30px; height:27px; clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); background:var(--gold); display:grid; place-items:center; font-family:var(--mono); font-size:.54rem; font-weight:700; color:#fff; flex:0 0 auto}
+.pcnt{font-family:var(--mono); font-weight:700; color:var(--gold-deep)}
+footer{padding:26px 0 44px; text-align:center; font-family:var(--mono); font-size:.56rem; letter-spacing:.26em; color:var(--faint)}
+
+.fab{position:fixed; bottom:22px; right:22px; z-index:60; display:flex; align-items:center; gap:9px; background:var(--panel); color:var(--ink); border:1.5px solid var(--gold); padding:12px 20px; border-radius:99px; font-family:var(--body); font-size:.82rem; font-weight:600; cursor:pointer; box-shadow:0 14px 30px -12px rgba(29,35,51,.4); transition:.3s}
+.fab:hover{transform:translateY(-3px); background:var(--gold-dim)}
+.fab svg{color:var(--gold-deep)}
+
+.js [data-reveal]{opacity:0; transform:translateY(20px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); transition-delay:var(--d,0s)}
+.js [data-reveal].in{opacity:1; transform:none}
+
+@media(max-width:1020px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .row2{grid-template-columns:1fr; padding-top:0}
+  .row2::before,.row2 .bcard::before{display:none}
+  .panels{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .kpis{grid-template-columns:1fr}
+  .subgrid,.people{grid-template-columns:1fr}
+  .search{margin-left:0; width:100%}
+  .search input{width:100%}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important; transition:none!important}
+  .js [data-reveal]{opacity:1; transform:none}
+  .in .brow .bar i,.brow .bar i{width:var(--w)}
+}
+
+/* ============ الطباعة / PDF — مقاسات مريحة + تقسيم كل وحدتين في صفحة ============ */
+@media print{
+  @page{size:A4; margin:9mm}
+  *{-webkit-print-color-adjust:exact; print-color-adjust:exact; animation:none!important; transition:none!important; box-shadow:none!important}
+  body{background:#fff; font-size:12.5px}
+  .fab,.search,.tog{display:none!important}
+  .js [data-reveal],[data-reveal]{opacity:1!important; transform:none!important}
+  .brow .bar i{width:var(--w)!important}
+  .unit.closed .people{display:grid!important}
+  .unit.closed .leads{display:flex!important}
+
+  /* ---- مقاسات أكبر وأوضح من قبل كده ---- */
+  .wrap{padding:0 14px}
+  .hero{padding:6px 0 0}
+  .hero .logo{width:64px; margin-bottom:6px}
+  .hero h1{font-size:1.35rem}
+  .hero p{font-size:.66rem}
+  .hero .chips{margin-top:8px; gap:6px}
+  .chip{font-size:.5rem; padding:3px 10px}
+  .toolbar{margin:10px 0 8px}
+  .toolbar h2{font-size:.95rem}
+  .toolbar h2 small{font-size:.5rem}
+  .legend{gap:6px; margin-bottom:10px}
+  .lg-item{font-size:.48rem; padding:3px 10px}
+  .kpis{gap:10px; margin-bottom:10px}
+  .kpi{padding:10px 14px}
+  .kpi .val{font-size:1.5rem}
+  .kpi .lab{font-size:.6rem}
+  .kpi .sub{font-size:.46rem}
+  .vline{height:12px}
+  .spot{padding:10px 16px; width:min(300px,74vw)}
+  .spot .av{width:40px; height:36px; font-size:.76rem; margin:5px auto 3px}
+  .spot.vice{padding:8px 14px; width:min(280px,70vw)}
+  .spot.vice .av{width:30px; height:28px; font-size:.58rem}
+  .spot .pos{font-size:.5rem}
+  .spot h3{font-size:.95rem}
+  .spot.vice h3{font-size:.85rem}
+  .spot .tid{font-size:.46rem}
+  .bcard{padding:10px}
+  .bhead{padding-bottom:8px; margin-bottom:8px}
+  .bhead .av{width:30px; height:27px; font-size:.56rem}
+  .bhead .t{font-size:.5rem}
+  .bhead b{font-size:.8rem}
+  .vchip{font-size:.46rem; padding:3px 7px}
+  .subgrid{gap:8px}
+  .row2{gap:10px}
+  .unit{padding:9px 11px}
+  .unit-head .ut{font-size:.56rem}
+  .unit-head .uc{font-size:.5rem}
+  .leads{gap:6px; margin:7px 0 0}
+  .ld{padding:4px 10px 4px 5px; gap:6px}
+  .ld .lb{font-size:.46rem; padding:2px 7px}
+  .ld b{font-size:.72rem}
+  /* عمودين بس في الطباعة عشان الأسماء تقرا مريح */
+  .people{grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-top:8px}
+  .pcard{padding:5px 8px 5px 5px; gap:6px}
+  .pcard .av{width:26px; height:23px; font-size:.48rem}
+  .pcard .pi b{font-size:.72rem; line-height:1.35}
+  .pcard .pr{font-size:.46rem}
+  .pcard .more{font-size:.48rem; padding:2px 6px}
+  .solo{font-size:.5rem; padding:6px; margin-top:7px}
+  .panels{gap:12px; margin-bottom:0}
+  .panel{padding:14px 16px}
+  .panel h2{font-size:.88rem; margin-bottom:12px}
+  .brow{grid-template-columns:100px minmax(0,1fr) 26px; gap:9px; margin-bottom:8px; font-size:.66rem}
+  .brow .bl{font-size:.54rem}
+  .brow .bar{height:8px}
+  .brow .bv{font-size:.64rem}
+  .mrow{padding:7px 10px; margin-bottom:7px}
+  .mrow .av{width:28px; height:25px; font-size:.54rem}
+  .mrow b{font-size:.78rem}
+  .mrow .cnt{font-size:.8rem}
+  .rt{font-size:.48rem; padding:2px 7px}
+  .dirwrap{margin-bottom:0}
+  table{font-size:.74rem}
+  th{font-size:.52rem; padding:7px 9px}
+  td{padding:7px 9px}
+  .who .av{width:26px; height:23px; font-size:.5rem}
+  footer{display:none}
+
+  /* ---- التقسيم: كل وحدتين في صفحة بالراحة ---- */
+  .cmd{break-before:auto; margin-bottom:10px}
+  .vline,.row2::before,.row2 .bcard::before{display:none}
+  .subgrid .unit:nth-child(3){break-before:page}   /* Boys + Girls في صفحة لوحدهم */
+  .subgrid .unit:nth-child(5){break-before:page}   /* Operations + PR + Media مع بعض */
+  .panels{break-before:page}
+  .dirwrap{break-before:page}
+  /* ممنوع القص جوه أي بلوك */
+  .kpi,.spot,.unit,.pcard,.ld,.mrow,.panel,.brow,tr,.lg-item,.bcard.pr,.bcard.media{break-inside:avoid}
+  .bcard,.subgrid,.branches{break-inside:auto}
+  .pcard,.mrow,tbody tr,.ld{animation:none}
+  .pcard.dim{opacity:1; filter:none}
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.className+=' js';</script>
+
+<svg class="svg-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="thebesLogo" viewBox="0 0 240 190">
+    <polygon points="162,95 124,160.8 48,160.8 10,95 48,29.2 124,29.2" fill="#4a8fc3"/>
+    <polygon points="10,95 48,29.2 124,29.2 86,95" fill="#ffffff" opacity=".22"/>
+    <polygon points="230,95 192,160.8 116,160.8 78,95 116,29.2 192,29.2" fill="#b23a2c"/>
+    <polygon points="192,160.8 116,160.8 154,95" fill="#e8604c" opacity=".85"/>
+    <polygon points="198,95 159,162.6 81,162.6 42,95 81,27.4 159,27.4" fill="#f6c445"/>
+    <polygon points="42,95 81,27.4 159,27.4 120,95" fill="#ffffff" opacity=".22"/>
+    <circle cx="120" cy="95" r="44" fill="#fdfefe"/>
+    <circle cx="120" cy="95" r="33" fill="#f6c445"/>
+    <g fill="#fdfefe">
+      <polygon points="120,66 96,82 144,82"/>
+      <rect x="96" y="86" width="48" height="13"/>
+      <rect x="113" y="86" width="14" height="41"/>
+      <rect x="96" y="103" width="13" height="24"/>
+      <rect x="131" y="103" width="13" height="24"/>
+    </g>
+  </symbol>
+</svg>
+
+<div class="topline"></div>
+
+<header class="hero wrap">
+  <svg class="logo" viewBox="0 0 240 190" role="img" aria-label="Thebes CPC Community logo"><use href="#thebesLogo"/></svg>
+  <h1>Thebes CPC Community — Organization Dashboard</h1>
+  <p>The full chain of command · every member, every role, one clear picture</p>
+  <div class="chips">
+    <span class="chip gold">SEASON 2026 / 2027</span>
+    <span class="chip plain" id="chipMembers">— MEMBERS</span>
+    <span class="chip plain" id="chipPos">— POSITIONS</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="toolbar" data-reveal>
+    <h2>Chain of Command <small>HEAD → VICE → BRANCHES → UNITS → MEMBERS</small></h2>
+    <div class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search any member across the org…" aria-label="Search members">
+    </div>
+  </div>
+
+  <div class="legend" id="legend" data-reveal style="--d:.05s"></div>
+
+  <div class="kpis">
+    <div class="kpi" data-reveal><div class="lab"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.8 20c.6-3.6 3.1-5.5 6.2-5.5s5.6 1.9 6.2 5.5M16 5.2a3.2 3.2 0 0 1 0 5.9M18.4 14.9c1.7.8 2.6 2.5 2.9 5.1"/></svg> Unique Members</div><div class="val" id="kMembers" data-count="0">0</div><div class="sub">PEOPLE ON THE ROSTER</div></div>
+    <div class="kpi" data-reveal style="--d:.06s"><div class="lab"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/></svg> Total Positions</div><div class="val" id="kPos" data-count="0">0</div><div class="sub">HEADS + VICES + MEMBERSHIPS</div></div>
+    <div class="kpi" data-reveal style="--d:.12s"><div class="lab"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg> Units & Teams</div><div class="val" id="kUnits" data-count="0">0</div><div class="sub">INSTRUCTORS · SETTERS · MENTORS · PR · MEDIA · OPS</div></div>
+    <div class="kpi" data-reveal style="--d:.18s"><div class="lab"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.9L12 16.4 6.8 19.2l1-5.9L3.5 9.2l5.9-.9L12 3z"/></svg> Multi-Role Holders</div><div class="val" id="kMulti" data-count="0">0</div><div class="sub">MEMBERS WITH 2+ POSITIONS</div></div>
+  </div>
+
+  <section class="cmd" id="cmd" data-reveal style="--d:.08s"></section>
+
+  <div class="panels">
+    <section class="panel" data-reveal>
+      <h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19V9M10 19V5M16 19v-8M22 19H2"/></svg> Unit Sizes</h2>
+      <div id="bars"></div>
+    </section>
+    <section class="panel" data-reveal style="--d:.08s">
+      <h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.9L12 16.4 6.8 19.2l1-5.9L3.5 9.2l5.9-.9L12 3z"/></svg> Multi-Role Holders — workload watch</h2>
+      <div id="multi"></div>
+    </section>
+  </div>
+
+  <section class="panel dirwrap" data-reveal>
+    <h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/></svg> Full Member Directory</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>ID</th><th>MEMBER</th><th>POS.</th><th>ROLES HELD</th></tr></thead>
+        <tbody id="dirBody"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer>THEBES CPC COMMUNITY · ORGANIZATION DASHBOARD · SEASON 2026/2027</footer>
+
+<button class="fab" id="printBtn" title="Print or save as PDF">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+  Print / PDF
+</button>
+
+<script>
+/* ======================================================================
+   THE ORG — exact structure as received. Edit names/roles here anytime.
+   ====================================================================== */
+const P = {
+  gold:  { s:'#b18a24', t:'rgba(177,138,36,.14)',  label:'LEADERSHIP' },
+  blue:  { s:'#2e6fa3', t:'rgba(46,111,163,.13)',  label:'INSTRUCTION' },
+  purple:{ s:'#6d5aa8', t:'rgba(109,90,168,.13)',  label:'PROBLEM SETTING' },
+  green: { s:'#2e7d5b', t:'rgba(46,125,91,.13)',   label:'MENTORSHIP · BOYS' },
+  pink:  { s:'#b0567c', t:'rgba(176,86,124,.13)',  label:'MENTORSHIP · GIRLS' },
+  grey:  { s:'#676e86', t:'rgba(103,110,134,.13)', label:'OPERATIONS' },
+  orange:{ s:'#bf6424', t:'rgba(191,100,36,.13)',  label:'PUBLIC RELATIONS' },
+  red:   { s:'#b23a2c', t:'rgba(178,58,44,.13)',   label:'MEDIA' },
+};
+
+const ORG = {
+  title:'COMMUNITY HEAD', name:'Ahmed Mahmoud',
+  children:[{
+    title:'VICE HEAD', name:'Hossam Zakaria',
+    children:[
+      { title:'TECHNICAL HEAD', name:'Ahmed Mahmoud', vice:'Yousef Osama', branch:'tech', children:[
+        { title:'INSTRUCTOR LEADER', name:'Yousef Osama', vice:'Mohamed Hossam',
+          unit:{ title:'INSTRUCTORS', tag:'Instructor', color:P.blue, members:['Seif Salah','Ahmed Magdy','Ahmed Ashraf','Mazen Mahmoud','Abdo Hany','Mohamed Hossam','Reem Diab','Mohamed Mo3taz','Malek Fares'] } },
+        { title:'PROBLEM SETTER LEADER', name:'Ahmed Mahmoud', vice:'Yousef Osama',
+          unit:{ title:'PROBLEM SETTERS', tag:'Problem Setter', color:P.purple, members:['Menna Allah Helal','Esraa','Mohamed Mo3taz'] } },
+        { title:'MENTOR LEADER — BOYS', name:'Abdallah Yousry', vice:'Ahmed Mahmoud',
+          unit:{ title:'MENTORS — BOYS', tag:'Mentor · Boys', color:P.green, members:['Abdallah Yousry','Hossam Zakaria','Yousef Osama','Ahmed Magdy','Mazen Mahmoud','Mohamed Hossam','Mohamed Mo3taz'] } },
+        { title:'MENTOR LEADER — GIRLS', name:'Manal Mohamed', vice:'Esraa',
+          unit:{ title:'MENTORS — GIRLS', tag:'Mentor · Girls', color:P.pink, members:['Esraa','Manal Mohamed','Reem Diab','Menna Allah Helal','Nehad Moahmed','Eman Elsayed'] } },
+        { title:'OPERATIONS LEADER', name:'Ahmed Hossam', unit:null },
+      ]},
+      { title:'PR HEAD', name:'Ahmed Mahmoud', branch:'pr',
+        unit:{ title:'PR TEAM', tag:'PR', color:P.orange, members:['Hossam Zakaria'] } },
+      { title:'MEDIA HEAD', name:'Ahmed Mahmoud', branch:'media',
+        unit:{ title:'MEDIA TEAM', tag:'Media', color:P.red, members:['Ahmed Magdy','Ahmed Ashraf','Seif Salah'] } },
+    ]
+  }]
+};
+
+/* ---------- collect assignments ---------- */
+const ASG = new Map();
+const UNITS = [];
+function push(person, role, color){
+  if(!ASG.has(person)) ASG.set(person, []);
+  ASG.get(person).push({ role, color });
+}
+function roleColor(r){
+  const u = r.toUpperCase();
+  if(u.includes('BOYS')) return P.green;
+  if(u.includes('GIRLS')) return P.pink;
+  if(u.includes('SETTER') || u.includes('PROBLEM')) return P.purple;
+  if(u.includes('COMMUNITY HEAD') || u === 'VICE HEAD') return P.gold;
+  if(u.includes('TECHNICAL')) return P.blue;
+  if(u.includes('INSTRUCTOR')) return P.blue;
+  if(u.includes('OPERATION')) return P.grey;
+  if(u.includes('PR')) return P.orange;
+  if(u.includes('MEDIA')) return P.red;
+  return P.gold;
+}
+function walk(n){
+  push(n.name, n.title, roleColor(n.title));
+  if(n.vice) push(n.vice, 'Vice · ' + n.title, roleColor(n.title));
+  if(n.unit){ UNITS.push({ title:n.unit.title, color:n.unit.color, size:n.unit.members.length });
+    n.unit.members.forEach(m => push(m, n.unit.tag, n.unit.color)); }
+  if(n.title.includes('OPERATIONS')) UNITS.push({ title:'OPERATIONS', color:P.grey, size:1 });
+  (n.children || []).forEach(walk);
+}
+walk(ORG);
+
+const MEMBERS = [...ASG.keys()];
+const POSITIONS = [...ASG.values()].reduce((s, v) => s + v.length, 0);
+const MULTI = MEMBERS.filter(m => ASG.get(m).length >= 2)
+  .sort((a, b) => ASG.get(b).length - ASG.get(a).length || a.localeCompare(b));
+
+document.getElementById('kMembers').dataset.count = MEMBERS.length;
+document.getElementById('kPos').dataset.count = POSITIONS;
+document.getElementById('kUnits').dataset.count = UNITS.length;
+document.getElementById('kMulti').dataset.count = MULTI.length;
+document.getElementById('chipMembers').textContent = MEMBERS.length + ' MEMBERS';
+document.getElementById('chipPos').textContent = POSITIONS + ' POSITIONS';
+
+const initials = n => n.trim().split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase();
+const $ = s => document.querySelector(s);
+
+/* ---------- role legend ---------- */
+$('#legend').innerHTML = Object.values(P).map(c =>
+  '<span class="lg-item"><i style="background:' + c.s + '"></i>' + c.label + '</span>').join('');
+
+/* ---------- chain of command ---------- */
+function viceBadge(title, color){
+  return '<span class="lb" style="background:' + color.t + '; color:' + color.s + '; border:1px solid ' + color.s + '66">VICE · ' + title + '</span>';
+}
+function unitPanel(n){
+  if(!n.unit){
+    return '<div class="unit" style="--c:' + P.grey.s + '"><div class="unit-head"><span class="dot"></span><span class="ut">OPERATIONS UNIT</span><span class="uc">1</span>' +
+      '<span class="tog"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></span></div>' +
+      '<div class="leads"><div class="ld"><span class="lb" style="background:' + P.grey.s + '">LEADER</span><b>' + n.name + '</b></div></div>' +
+      '<div class="solo">SOLO UNIT · NO MEMBERS YET</div></div>';
+  }
+  const u = n.unit;
+  const leads = '<div class="leads"><div class="ld"><span class="lb" style="background:' + u.color.s + '">LEADER</span><b>' + n.name + '</b></div>' +
+    (n.vice ? '<div class="ld">' + viceBadge(n.title, u.color) + '<b>' + n.vice + '</b></div>' : '') + '</div>';
+  const people = '<div class="people">' + u.members.map((m,i) => {
+    const extra = ASG.get(m).length - 1;
+    return '<div class="pcard" data-n="' + m.toLowerCase() + '" style="--c:' + u.color.s + '; --i:' + i + '">' +
+      '<span class="av">' + initials(m) + '</span>' +
+      '<div class="pi"><b>' + m + '</b><span class="pr" style="color:' + u.color.s + '">' + u.tag.toUpperCase() + '</span></div>' +
+      (extra > 0 ? '<span class="more" title="Also: ' + ASG.get(m).filter(r => r.role.toUpperCase() !== u.tag.toUpperCase()).map(r => r.role).join(' · ') + '">+' + extra + '</span>' : '') +
+      '</div>';
+  }).join('') + '</div>';
+  return '<div class="unit" style="--c:' + u.color.s + '"><div class="unit-head"><span class="dot"></span><span class="ut">' + u.title + '</span><span class="uc">' + u.members.length + '</span>' +
+    '<span class="tog"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></span></div>' +
+    leads + people + '</div>';
+}
+function renderCmd(){
+  const head = ORG, vice = ORG.children[0];
+  const tech = vice.children.find(c => c.branch === 'tech');
+  const pr = vice.children.find(c => c.branch === 'pr');
+  const media = vice.children.find(c => c.branch === 'media');
+  let h = '';
+  h += '<div class="spot head" style="--c:' + P.gold.s + '"><span class="pos">COMMUNITY HEAD</span><div class="av">' + initials(head.name) + '</div><h3>' + head.name + '</h3><span class="tid">TPC · LEADERSHIP · L1</span></div>';
+  h += '<div class="vline"></div>';
+  h += '<div class="spot vice" style="--c:' + P.blue.s + '"><span class="pos">VICE HEAD</span><div class="av">' + initials(vice.name) + '</div><h3>' + vice.name + '</h3><span class="tid">DEPUTY OF THE COMMUNITY HEAD · L2</span></div>';
+  h += '<div class="vline blue"></div>';
+  h += '<div class="branches">';
+  h += '<article class="bcard tech" style="--c:' + P.blue.s + '"><div class="bhead"><span class="av" style="background:' + P.blue.s + '">' + initials(tech.name) + '</span><div><span class="t">TECHNICAL HEAD · L3</span><b>' + tech.name + '</b></div>' +
+       '<span class="vchip">' + viceBadge('TECHNICAL HEAD', P.blue) + ' <b>' + tech.vice + '</b></span></div>' +
+       '<div class="subgrid">';
+  tech.children.forEach(c => h += unitPanel(c));
+  h += '</div></article>';
+  h += '<div class="vline blue"></div>';
+  h += '<div class="row2">';
+  h += '<article class="bcard pr" style="--c:' + P.orange.s + '"><div class="bhead"><span class="av" style="background:' + P.orange.s + '">' + initials(pr.name) + '</span><div><span class="t">PR HEAD · L3</span><b>' + pr.name + '</b></div></div>' + unitPanel(pr) + '</article>';
+  h += '<article class="bcard media" style="--c:' + P.red.s + '"><div class="bhead"><span class="av" style="background:' + P.red.s + '">' + initials(media.name) + '</span><div><span class="t">MEDIA HEAD · L3</span><b>' + media.name + '</b></div></div>' + unitPanel(media) + '</article>';
+  h += '</div></div>';
+  $('#cmd').innerHTML = h;
+}
+renderCmd();
+document.getElementById('cmd').addEventListener('click', e => {
+  const hd = e.target.closest('.unit-head');
+  if(hd) hd.parentElement.classList.toggle('closed');
+});
+
+/* ---------- unit size bars ---------- */
+const maxU = Math.max(...UNITS.map(u => u.size));
+$('#bars').innerHTML = UNITS.sort((a,b) => b.size - a.size).map(u =>
+  '<div class="brow" style="--c:' + u.color.s + '"><span class="bl">' + u.title + '</span><span class="bar"><i style="--w:' + (u.size/maxU*100) + '%"></i></span><span class="bv">' + u.size + '</span></div>'
+).join('');
+
+/* ---------- multi-role + directory ---------- */
+function tagsHTML(list, cap){
+  const show = list.slice(0, cap || 6);
+  return show.map(r => '<span class="rt" style="background:' + r.color.t + '; color:' + r.color.s + '; border:1px solid ' + r.color.s + '55">' + r.role.toUpperCase() + '</span>').join('') +
+    (list.length > show.length ? '<span class="rt" style="background:var(--panel-3); color:var(--muted); border:1px solid var(--line)">+' + (list.length - show.length) + '</span>' : '');
+}
+function renderMulti(){
+  const list = MULTI.filter(m => m.toLowerCase().includes(query));
+  $('#multi').innerHTML = list.map(m =>
+    '<div class="mrow"><span class="av">' + initials(m) + '</span><div class="mi"><b>' + m + '</b><div class="tags">' + tagsHTML(ASG.get(m), 4) + '</div></div>' +
+    '<span class="cnt">' + ASG.get(m).length + '<small>ROLES</small></span></div>'
+  ).join('') || '<div class="solo">NO MATCHES</div>';
+}
+function renderDir(){
+  const rows = MEMBERS.filter(m => (m + ' ' + ASG.get(m).map(r => r.role).join(' ')).toLowerCase().includes(query))
+    .sort((a,b) => ASG.get(b).length - ASG.get(a).length || a.localeCompare(b));
+  $('#dirBody').innerHTML = rows.map((m,i) =>
+    '<tr style="--i:' + i + '"><td class="mono" style="color:var(--faint); font-size:.64rem">TPC-' + String(MEMBERS.indexOf(m)+1).padStart(3,'0') + '</td>' +
+    '<td><span class="who"><span class="av">' + initials(m) + '</span>' + m + '</span></td>' +
+    '<td><span class="pcnt">' + ASG.get(m).length + '</span></td>' +
+    '<td><div class="tags" style="display:flex; flex-wrap:wrap; gap:5px">' + tagsHTML(ASG.get(m), 6) + '</div></td></tr>'
+  ).join('') || '<tr><td colspan="4" style="text-align:center; color:var(--faint); padding:20px">No matches found</td></tr>';
+}
+
+/* ---------- search ---------- */
+let query = '';
+function applySearch(){
+  renderMulti(); renderDir();
+  document.querySelectorAll('.pcard').forEach(ch => {
+    ch.classList.toggle('dim', !!query && !ch.dataset.n.includes(query));
+  });
+}
+renderMulti(); renderDir();
+$('#q').addEventListener('input', function(){ query = this.value.trim().toLowerCase(); applySearch(); });
+
+/* ---------- print ---------- */
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+window.addEventListener('beforeprint', () => {
+  document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in'));
+});
+
+/* ---------- reveal + count-up ---------- */
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function countUp(el){
+  const end = +el.dataset.count;
+  if(reduced || !end){ el.textContent = end; return; }
+  let t0 = null;
+  requestAnimationFrame(function step(t){
+    if(!t0) t0 = t;
+    const p = Math.min((t - t0)/1100, 1), e = 1 - Math.pow(1-p, 3);
+    el.textContent = Math.round(end*e);
+    if(p < 1) requestAnimationFrame(step);
+  });
+}
+const revs = document.querySelectorAll('[data-reveal]');
+if('IntersectionObserver' in window && !reduced){
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if(e.isIntersecting){ e.target.classList.add('in'); e.target.querySelectorAll('[data-count]').forEach(countUp); io.unobserve(e.target); }
+  }), {threshold:.1});
+  revs.forEach(r => io.observe(r));
+} else {
+  revs.forEach(r => { r.classList.add('in'); r.querySelectorAll('[data-count]').forEach(countUp); });
+}
+</script>
+</body>
+</html>
